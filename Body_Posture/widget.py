@@ -2,7 +2,7 @@ import cv2
 import mediapipe as mp
 import sys
 import time
-import winsound  # 🔊 Ses uyarısı için
+import winsound  
 
 from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtCore import QTimer, Qt
@@ -28,9 +28,9 @@ class Widget(QWidget):
                                       min_detection_confidence=0.5,
                                       min_tracking_confidence=0.5)
 
-        # 🔄 Son bip zamanı (sürekli bip engellemek için)
+       
         self.last_beep_time = 0
-        self.beep_interval = 3  # saniye
+        self.beep_interval = 3  
 
     def show_frame(self):
         ret, frame = self.cap.read()
@@ -40,7 +40,7 @@ class Widget(QWidget):
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = self.pose.process(frame_rgb)
 
-        durus_iyi = True  # Varsayılan olarak iyi
+        durus_iyi = True  
 
         if results.pose_landmarks:
             landmarks = results.pose_landmarks.landmark
@@ -54,7 +54,7 @@ class Widget(QWidget):
             shoulder_px = int(left_shoulder.x * w), int(left_shoulder.y * h)
             hip_px = int(left_hip.x * w), int(left_hip.y * h)
 
-            # Noktaları çiz
+           
             cv2.circle(frame, ear_px, 6, (0, 255, 255), -1)
             cv2.circle(frame, shoulder_px, 8, (0, 255, 0), -1)
             cv2.circle(frame, hip_px, 8, (255, 0, 0), -1)
@@ -67,13 +67,13 @@ class Widget(QWidget):
 
             durus_iyi = kulak_omuz_dogru and omuz_kalca_dogru
 
-            # Renk belirle
+           
             line_color = (0, 255, 0) if durus_iyi else (0, 0, 255)
 
             cv2.line(frame, ear_px, shoulder_px, line_color, 2)
             cv2.line(frame, shoulder_px, hip_px, line_color, 2)
 
-            # Uyarıları ekrana yaz
+           
             uyarilar = []
             if not kulak_omuz_dogru:
                 uyarilar.append("don't let your head down")
@@ -87,13 +87,13 @@ class Widget(QWidget):
                 cv2.putText(frame, uyari, (50, y), cv2.FONT_HERSHEY_SIMPLEX, 0.9, line_color, 2)
                 y += 40
 
-            # 🔊 Sesli uyarı
+            
             current_time = time.time()
             if not durus_iyi and (current_time - self.last_beep_time) > self.beep_interval:
                 winsound.Beep(1000, 500)  # 1000 Hz, 500 ms
                 self.last_beep_time = current_time
 
-        # Görüntüyü QLabel'e aktar
+      
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         h, w, ch = frame.shape
         bytes_per_line = ch * w
